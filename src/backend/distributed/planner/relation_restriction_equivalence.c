@@ -1179,6 +1179,16 @@ AddRteSubqueryToAttributeEquivalenceClass(AttributeEquivalenceClass
 	TargetEntry *subqueryTargetEntry = NULL;
 	Query *targetSubquery = GetTargetSubquery(root, rangeTableEntry, varToBeAdded);
 
+	/*
+	 * We might not always get the subquery because the subquery might be a
+	 * referencing to RELOPT_DEADREL such that the corresponding join is
+	 * removed via join_is_removable().
+	 */
+	if (targetSubquery == NULL)
+	{
+		return;
+	}
+
 	subqueryTargetEntry = get_tle_by_resno(targetSubquery->targetList,
 										   varToBeAdded->varattno);
 
@@ -1252,7 +1262,7 @@ GetTargetSubquery(PlannerInfo *root, RangeTblEntry *rangeTableEntry, Var *varToB
 	{
 		RelOptInfo *baseRelOptInfo = find_base_rel(root, varToBeAdded->varno);
 
-		/* If the targetSubquery hasn't been planned yet, we have to punt */
+		/* If the targetSubquery not planned, we have to punt */
 		if (baseRelOptInfo->subroot == NULL)
 		{
 			return NULL;
