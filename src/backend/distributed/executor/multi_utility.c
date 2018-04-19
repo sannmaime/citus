@@ -2518,7 +2518,12 @@ ErrorIfUnsupportedConstraint(Relation relation, char distributionMethod,
 		}
 
 		attributeCount = indexInfo->ii_NumIndexAttrs;
+
+#if (PG_VERSION_NUM >= 110000)
+		attributeNumberArray = indexInfo->ii_IndexAttrNumbers;
+#else
 		attributeNumberArray = indexInfo->ii_KeyAttrNumbers;
+#endif
 
 		for (attributeIndex = 0; attributeIndex < attributeCount; attributeIndex++)
 		{
